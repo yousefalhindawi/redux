@@ -1,24 +1,39 @@
-import logo from './logo.svg';
-import './App.css';
+import { Suspense, lazy } from "react";
+import { Route, Routes } from "react-router-dom";
+import { Provider } from "react-redux";
+import "./App.css";
+import Car from "./pages/Car";
+import store from "./redux/Store";
+import Plane from "./pages/Plane";
+import ErrorBoundary from "./components/ErrorBoundry/ErrorBoundry";
+import { AuthProvider } from "./utils/authContext/authContext";
+import RequireAuth from "./components/RequireAuth/RequireAuth";
+const LazyUser = lazy(() => import("./pages/User"));
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <ErrorBoundary>
+        <AuthProvider>
+          <Provider store={store}>
+            <Routes>
+              <Route path="/" element={<Car />} />
+              <Route element={<RequireAuth />}>
+                <Route path="/plane" element={<Plane />} />
+              </Route>
+              <Route
+                path="/user"
+                element={
+                  <Suspense fallback={<div>Loading...</div>}>
+                    <LazyUser />
+                  </Suspense>
+                }
+              />
+            </Routes>
+          </Provider>
+        </AuthProvider>
+      </ErrorBoundary>
+    </>
   );
 }
 
